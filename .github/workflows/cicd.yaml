@@ -1,0 +1,32 @@
+name: CICD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  queue: max
+
+jobs:
+  cicd:
+    if: github.repository == 'canonical/hal9000-smollm3-snap'
+    uses: canonical/inference-snaps-dev/.github/workflows/reuse-cicd.yaml@v2
+    with:
+      build-runner: |
+        [
+          "ubuntu-24.04",
+          "ubuntu-24.04-arm"
+        ]
+      store-track: latest
+      snap-name: hal9000-smollm3
+      smoke-test-engine: cpu
+      smoke-test-runner: |
+        [
+          "ubuntu-24.04",
+          "ubuntu-24.04-arm"
+        ]
+    secrets:
+      store-credentials: ${{ secrets.STORE_LOGIN_MAIN }}
