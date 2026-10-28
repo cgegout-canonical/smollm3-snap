@@ -2,16 +2,13 @@
 
 port="$(modelctl get http.port)"
 host="$(modelctl get http.host)"
-sleep_idle_seconds="$(modelctl get sleep-idle-seconds || echo -1)"
-min_context_size="$(modelctl get min-context-size || echo 4096)"
-threads="$(modelctl get threads || echo 6)"
-model_name="$(modelctl model --format=json | jq -r '.name')"
-
-extra_args=()
-verbose="$(modelctl get verbose || echo false)"
-if [ "${verbose}" = "true" ]; then
-  extra_args+=(--verbose)
+sleep_idle_seconds="$(modelctl get sleep-idle-seconds)"
+min_context_size="$(modelctl get min-context-size)"
+reasoning_budget="$(modelctl get reasoning-budget || true)"
+if [ -z "${reasoning_budget:-}" ]; then
+  reasoning_budget=64
 fi
+model_name=$("$SNAP_NAME" status --format=json | jq -r '.model.name')
 
 mmproj_args=()
 if [ -n "${MMPROJ_FILE:-}" ]; then
@@ -19,6 +16,7 @@ if [ -n "${MMPROJ_FILE:-}" ]; then
 fi
 
 set -x
+# Adding --no-warmup to skip the model warmup phase during server startup in order to reduce resource usage if not needed.
 exec llama-server \
   --model "$MODEL_FILE" \
   --alias "$model_name" \
@@ -26,13 +24,7 @@ exec llama-server \
   --port "$port" \
   --host "$host" \
   --no-warmup \
-  --reasoning off \
-  --reasoning-budget 0 \
-  --ctx-size 4096 \
-  --parallel 1 \
-  --threads "$threads" \
   --sleep-idle-seconds "$sleep_idle_seconds" \
-  --cache-prompt \
   --fit-ctx "$min_context_size" \
-  "${extra_args[@]}" \
+  --reasoning-budget "$reasoning_budget" \
   "$@"

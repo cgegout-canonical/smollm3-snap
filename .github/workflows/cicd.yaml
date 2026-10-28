@@ -1,18 +1,23 @@
+# This workflow is triggered when a push is made to the main branch or when manually triggered.
+# To skip a run on push, add [skip ci] to the commit message.
 name: CICD
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  
+  workflow_dispatch: # manual trigger 
 
+
+# Keep one CICD run active at a time so publish/test/promote happen in order
 concurrency:
   group: ${{ github.workflow }}
   queue: max
 
 jobs:
   cicd:
-    if: github.repository == 'canonical/smollm3-snap'
+    if: github.repository == 'canonical/smollm3-snap' # do not run on forks
     uses: canonical/inference-snaps-dev/.github/workflows/reuse-cicd.yaml@v2
     with:
       build-runner: |
@@ -23,6 +28,7 @@ jobs:
       store-track: latest
       snap-name: smollm3
       smoke-test-engine: cpu
+      smoke-test-features: openai_models, openai_chat_text
       smoke-test-runner: |
         [
           "ubuntu-24.04",

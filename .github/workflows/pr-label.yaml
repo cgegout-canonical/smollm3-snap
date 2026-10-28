@@ -1,3 +1,5 @@
+# This workflow is triggered when a label is added to a pull request.
+# It runs the build/test workflow depending on the label applied to the PR.
 name: PR Label
 
 on:
@@ -15,6 +17,7 @@ permissions:
 
 jobs:
   build-test:
+    # The applied label is used to select build/test tasks and as job's display name.
     name: ${{ github.event.label.name }}
     uses: canonical/inference-snaps-dev/.github/workflows/reuse-pr-build-test.yaml@v2
     with:
@@ -32,6 +35,14 @@ jobs:
             "provision-data": "distro: noble",
             "select-engine": "cpu",
             "test-chat-tps": true
+          },
+          {
+            "job-queue": "anbox-nvidia-amd64",
+            "provision-data": "distro: noble",
+            "install-nvidia-driver-version": 595,
+            "select-engine": "nvidia-gpu",
+            "test-chat-tps": true,
+            "expected-tps": 9.4
           }
         ]
       snap-name: smollm3
@@ -40,3 +51,4 @@ jobs:
       store-credentials: ${{ secrets.STORE_LOGIN_PR }}
       github-token: ${{ secrets.GITHUB_TOKEN }}
       testflinger-secret-key: ${{ secrets.TESTFLINGER_SECRET_KEY }}
+      

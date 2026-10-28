@@ -1,8 +1,7 @@
-HAL9000 SmolLM3 Inference Snap
-Copyright 2026 Canonical Ltd.
+SmolLM3 is provided under and subject to the Apache License, Version 2.0 found at https://huggingface.co/HuggingFaceTB/SmolLM3-3B/blob/main/LICENSE
 
-This software includes components licensed under the Apache License 2.0:
-- SmolLM3 3B Model Weights (Hugging Face TB, Apache-2.0)
-- llama.cpp (Georgi Gerganov and contributors, MIT)
-- inference-snaps-cli (Canonical Ltd., GPL-3.0)
-- inference-snaps-webui (Canonical Ltd., GPL-3.0)
+A copy of the Apache License, Version 2.0 is included herein and can be found in the LICENSE-smollm3 file.
+
+The snap packaging code is licensed separately under the terms specified in the LICENSE file.
+
+All artifacts and dependencies included within this snap package are subject to their respective licenses, which are documented and available at /snap/smollm3/current/usr/share/doc within the installed snap package.

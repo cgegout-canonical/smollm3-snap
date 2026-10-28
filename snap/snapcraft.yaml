@@ -11,6 +11,8 @@ description: |
   The snap includes the following hardware-optimized inference engines:
 
   * cpu: Optimized for x64 and ARM (armv8, armv9) CPUs
+  * intel-gpu: Vulkan-enabled GPU acceleration for Intel GPUs
+  * nvidia-gpu: CUDA-enabled GPU acceleration
 
   The most suitable engine is automatically selected based on the available hardware.
 
@@ -46,7 +48,7 @@ confinement: strict
 compression: lzo
 
 assumes:
-  - snapd2.68
+  - snapd2.68 # for components support
 
 platforms:
   amd64:
@@ -59,8 +61,8 @@ slots:
     source:
       read:
         - $SNAP_COMMON/share/provider
-
 plugs:
+  # To allow side-loading models into server (root daemon) from user home directory
   home:
     read: all
 
@@ -68,9 +70,15 @@ environment:
   SNAP_COMPONENTS: /snap/$SNAP_INSTANCE_NAME/components/$SNAP_REVISION
   ARCH_TRIPLET: $CRAFT_ARCH_TRIPLET_BUILD_FOR
 
+layout:
+  # Under wsl the libraries are expected in /usr/lib/wsl
+  /usr/lib/wsl:
+    bind: $SNAP_COMMON/usr/lib/wsl
+
 hooks:
   install:
     plugs: &install-plugs
+      # For hardware detection
       - hardware-observe
       - opengl
   post-refresh:
@@ -80,7 +88,7 @@ parts:
   version:
     after: [cli]
     plugin: nil
-    source: .
+    source: . # To regenerate the git hash on every change
     build-packages:
       - jq
       - git
@@ -91,7 +99,6 @@ parts:
       cli_version=$($CRAFT_STAGE/bin/modelctl version --format=json | jq .cli --raw-output)
       git_hash=$(git -C "$SNAPCRAFT_PROJECT_DIR" describe --always)
       craftctl set version="${cli_version#v}+${git_hash}"
-
   cli:
     source:
       - on amd64: https://github.com/canonical/inference-snaps-cli/releases/download/v2.0.0-beta.18/inference-snaps-cli-linux-amd64.tar.xz
@@ -102,20 +109,55 @@ parts:
       cat << 'EOF' > bin/modelctl
       #!/bin/bash
       if [ -n "${SNAP:-}" ] && [ -d "${SNAP}/components" ]; then
-        if [ -z "${SNAP_COMPONENTS:-}" ] || [ ! -d "${SNAP_COMPONENTS}/llamacpp" ] || [ ! -d "${SNAP_COMPONENTS}/smollm3-3b-q4-k-m-gguf" ]; then
+        if [ -z "${SNAP_COMPONENTS:-}" ] || [ ! -d "${SNAP_COMPONENTS}/llamacpp" ] || [ ! -d "${SNAP_COMPONENTS}/llamacpp-cuda" ] || [ ! -d "${SNAP_COMPONENTS}/llamacpp-vulkan" ] || [ ! -d "${SNAP_COMPONENTS}/smollm3-3b-q4-k-m-gguf" ]; then
           export SNAP_COMPONENTS="${SNAP}/components"
         fi
       fi
       exec -a "$0" "$(dirname "$0")/modelctl.real" "$@"
       EOF
       chmod +x bin/modelctl
+      # For tab completion
       ln --symbolic ./modelctl bin/smollm3
+
       craftctl default
 
+  # To build the CLI from source, replace the above part with the following:
+  # If the source version is longer than 32 char, replace the versioning line with 'craftctl set version="dev"'
+  # cli:
+  #   # Repo checked out in the same project:
+  #   # source: ./inference-snaps-cli
+  #   # Repo from GitHub:
+  #   source: https://github.com/canonical/inference-snaps-cli.git
+  #   source-branch: <branch>
+  #   plugin: go
+  #   build-snaps:
+  #     - go/1.26/stable
+  #   override-build: |
+  #     craftctl default
+
+  #     # For tab completion
+  #     mkdir -p $CRAFT_PART_INSTALL/bin
+  #     cp completer/snap.bash $CRAFT_PART_INSTALL/bin/snap-completer.bash
+  #     ln --symbolic ./modelctl $CRAFT_PART_INSTALL/bin/smollm3
+      
   cli-lspci:
     plugin: nil
     stage-packages:
-      - pciutils
+      - pciutils # lspci
+
+  # Used for NVIDIA vRAM and CUDA Capability detection.
+  # Only the binary is included to avoid staging libraries, which should instead be provided by the host through the opengl interface.
+  cli-nvidia-smi:
+    plugin: nil
+    build-packages:
+      - nvidia-utils-580
+    override-build: |
+      mkdir -p $CRAFT_PART_INSTALL/usr/bin
+      cp /usr/bin/nvidia-smi $CRAFT_PART_INSTALL/usr/bin/
+      
+      license_dir=$CRAFT_PART_INSTALL/usr/share/doc/nvidia-utils-580
+      mkdir -p $license_dir
+      cp /usr/share/doc/nvidia-utils-580/copyright $license_dir/
 
   webui:
     plugin: dump
@@ -140,7 +182,7 @@ parts:
     plugin: dump
     organize:
       "*": runtimes/
-
+  
   scripts:
     source: scripts
     plugin: dump
@@ -151,21 +193,26 @@ parts:
       "server-webui.sh": bin/
 
   model-weights:
-    plugin: cmake
+    plugin: cmake # an out-of-source plugin to reduce copies on disk
     source: model-weights
     override-build: |
       cp -rf --archive --link --no-dereference ${CRAFT_PART_SRC}/* ${CRAFT_PART_INSTALL}
       mkdir -p ${CRAFT_PART_INSTALL}/components/smollm3-3b-q4-k-m-gguf
       cp -rf --archive --link --no-dereference ${CRAFT_PART_SRC}/smollm3-3b-q4-k-m-gguf/* ${CRAFT_PART_INSTALL}/components/smollm3-3b-q4-k-m-gguf/
     organize:
+      "llamacpp/*": (component/llamacpp)
+      "llamacpp-cuda/*": (component/llamacpp-cuda)
+      "llamacpp-vulkan/*": (component/llamacpp-vulkan)
       "smollm3-3b-q4-k-m-gguf/*": (component/smollm3-3b-q4-k-m-gguf)
+      
     prime:
+      # Exclude everything not explicitly organized except bundled components fallback
       - -*
       - components/**
 
   llamacpp:
     plugin: dump
-    source:
+    source: 
       - on amd64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-amd64.tar.gz
       - on arm64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-arm64.tar.gz
     stage-packages:
@@ -175,9 +222,38 @@ parts:
       mkdir -p ${CRAFT_PART_INSTALL}/components/llamacpp
       cp -rf --archive --link --no-dereference ${CRAFT_PART_INSTALL}/bin ${CRAFT_PART_INSTALL}/lib ${CRAFT_PART_INSTALL}/usr ${CRAFT_PART_INSTALL}/components/llamacpp/
     organize:
-      "licenses": usr/share/doc/llama.cpp
+      "licenses": usr/share/doc/llama.cpp # Add licenses to the snap
       "components/llamacpp": components/llamacpp
       "*": (component/llamacpp)
+    
+  llamacpp-cuda:
+    plugin: dump
+    source: 
+      - on amd64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-amd64+cuda12.9.tar.gz
+      - on arm64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-arm64+cuda12.9.tar.gz
+    stage-packages:
+      - libgomp1
+    override-build: |
+      craftctl default
+      mkdir -p ${CRAFT_PART_INSTALL}/components/llamacpp-cuda
+      cp -rf --archive --link --no-dereference ${CRAFT_PART_INSTALL}/bin ${CRAFT_PART_INSTALL}/lib ${CRAFT_PART_INSTALL}/usr ${CRAFT_PART_INSTALL}/components/llamacpp-cuda/
+    organize:
+      "licenses": usr/share/doc/llama.cpp+cuda # Add licenses to the snap
+      "components/llamacpp-cuda": components/llamacpp-cuda
+      "*": (component/llamacpp-cuda)
+
+  llamacpp-vulkan:
+    plugin: dump
+    source:
+      - on amd64: https://github.com/ggml-org/llama.cpp/releases/download/b11669/llama-b11669-bin-ubuntu-vulkan-x64.tar.gz
+      - on arm64: https://github.com/ggml-org/llama.cpp/releases/download/b11669/llama-b11669-bin-ubuntu-vulkan-arm64.tar.gz
+    stage-packages:
+      - libgomp1
+      - libvulkan1
+      - mesa-vulkan-drivers
+    organize:
+      "components/llamacpp-vulkan": components/llamacpp-vulkan
+      "*": (component/llamacpp-vulkan)
 
   notice:
     plugin: nil
@@ -200,6 +276,16 @@ components:
     type: standard
     summary: llama.cpp using default CPU instruction sets
     description: LLM inference in C/C++
+  
+  llamacpp-cuda:
+    type: standard
+    summary: llama.cpp with CUDA backend
+    description: LLM inference in C/C++
+
+  llamacpp-vulkan:
+    type: standard
+    summary: llama.cpp with Vulkan backend
+    description: LLM inference in C/C++
 
 apps:
   smollm3:
@@ -209,7 +295,7 @@ apps:
       - hardware-observe
       - opengl
       - network
-      - desktop
+      - desktop # To open the webui in the browser
     environment:
       ADDITIONAL_FEATURES: chat, webui
 

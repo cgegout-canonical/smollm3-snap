@@ -5,9 +5,8 @@ hf := pipx run --spec "huggingface_hub[cli]" hf
 
 SNAP_NAME ?= smollm3
 ENGINE ?= cpu
-MODEL_SOURCE_DIR ?= /home/cgegout/projects/smollm3_old
 
-.PHONY: all help init build install upload smoke-test install-deps init-submodules download-models download-model-3b
+.PHONY: help all init init-submodules install-deps download-models download-model-3b build install upload smoke-test
 
 all: help
 
@@ -44,8 +43,10 @@ smoke-test: ## Run smoke tests (override with SNAP_NAME=... ENGINE=...)
 
 install-deps:
 	@echo "Installing dependencies..."
+	@# Ensure pipx is available for running the hf CLI.
 	@command -v pipx >/dev/null 2>&1 || { \
-		echo "pipx missing; install via apt if privileges allow."; \
+		sudo apt-get update; \
+		sudo apt-get install -y pipx; \
 	}
 
 init-submodules:
@@ -55,17 +56,9 @@ init-submodules:
 	fi
 
 download-models: download-model-3b
-
+	
 download-model-3b:
-	@echo "Preparing SmolLM3-3B Q4_K_M model weights..."
-	@mkdir -p model-weights/smollm3-3b-q4-k-m-gguf
-	@if [ -f "$(MODEL_SOURCE_DIR)/model-weights/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf" ]; then \
-		echo "Reflinking/copying local model weights from $(MODEL_SOURCE_DIR)..."; \
-		cp --reflink=auto "$(MODEL_SOURCE_DIR)/model-weights/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf" \
-			model-weights/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf; \
-	else \
-		echo "Local model not found at $(MODEL_SOURCE_DIR). Downloading via huggingface CLI..."; \
-		$(hf) download unsloth/SmolLM3-3B-GGUF \
-			SmolLM3-3B-Q4_K_M.gguf \
-			--local-dir model-weights/smollm3-3b-q4-k-m-gguf/; \
-	fi
+	@echo "Downloading SmolLM3-3B-GGUF model weights..."
+	$(hf) download unsloth/SmolLM3-3B-GGUF \
+		SmolLM3-3B-Q4_K_M.gguf \
+		--local-dir model-weights/smollm3-3b-q4-k-m-gguf/

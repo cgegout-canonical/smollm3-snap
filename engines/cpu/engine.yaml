@@ -11,11 +11,11 @@ devices:
 runtime: llamacpp
 
 model:
-  default: smollm3-3b-q4-k-m-gguf
+  default: smollm3-3b
   options:
-    - smollm3-3b-q4-k-m-gguf
+    - smollm3-3b
 
 configurations:
-  sleep-idle-seconds: -1
+  sleep-idle-seconds: 600
   min-context-size: 4096
-  threads: 6
+  reasoning-budget: 64

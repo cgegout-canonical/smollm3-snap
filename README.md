@@ -1,24 +1,16 @@
----
-snap-name: smollm3
-snap-title: SmolLM3
-model-card: https://huggingface.co/unsloth/SmolLM3-3B-GGUF
-http-port: 8356
-webui-http-port: 8357
-engines: cpu
----
-
 # SmolLM3 inference snap
 [![smollm3](https://snapcraft.io/smollm3/badge.svg)](https://snapcraft.io/smollm3)
 
-SmolLM3 is a compact large language model optimized for low-latency conversations, reasoning, and instruction-following tasks.
+SmolLM3 is a compact large language model (LLM) developed by Hugging Face, designed for efficient natural language tasks such as text generation, summarization, reasoning, and question answering.
 
 Use this snap to quickly install an optimized environment for local inference with SmolLM3.
 
 The snap includes the following hardware-optimized inference engines:
 
-* cpu: Optimized for x64 CPUs with AVX2 and AVX-VNNI support
+* cpu: Optimized for x64 and ARM (armv8, armv9) CPUs
+* nvidia-gpu: CUDA-enabled GPU acceleration
 
-The CPU engine is automatically selected for host execution without requiring GPU drivers.
+The most suitable engine is automatically selected based on the available hardware.
 
 #### Install
 ```shell
@@ -29,6 +21,9 @@ sudo snap install smollm3
 ```shell
 smollm3
 ```
+
+> [!TIP]
+> Some accelerators require extra [drivers](https://documentation.ubuntu.com/inference-snaps/how-to/setup/drivers/) to be usable with this snap.
 
 ## Resources
 

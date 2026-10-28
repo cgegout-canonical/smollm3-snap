@@ -1,0 +1,35 @@
+name: intel-gpu
+summary: Vulkan optimized for Intel GPUs
+description: |
+  This engine uses llama.cpp with Vulkan GPU acceleration.
+
+  It is optimized for Intel GPUs, including:
+  - Xe Graphics (Alchemist)
+  - Xe2 Graphics (Battlemage)
+  - Raptor Lake
+  - Meteor Lake
+  - Lunar Lake
+  - Arrow Lake
+  - Panther Lake
+vendor: Intel Corporation
+devices:
+  allof:
+    - type: gpu
+      vendor-id: 0x8086 # Intel Corporation
+  anyof:
+    - type: cpu
+      architecture: amd64
+    - type: cpu
+      architecture: arm64
+
+runtime: llamacpp-vulkan
+
+model:
+  default: smollm3-3b
+  options:
+    - smollm3-3b
+
+configurations:
+  sleep-idle-seconds: 600
+  min-context-size: 4096
+  reasoning-budget: 64

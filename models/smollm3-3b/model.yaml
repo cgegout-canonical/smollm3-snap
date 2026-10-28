@@ -1,4 +1,4 @@
-name: smollm3-3b-q4-k-m-gguf
+name: smollm3-3b
 quantization: Q4_K_M
 disk-size: 1827M
 required-memory: 0M
