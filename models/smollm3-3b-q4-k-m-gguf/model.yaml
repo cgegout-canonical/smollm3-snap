@@ -1,0 +1,19 @@
+name: smollm3-3b-q4-k-m-gguf
+quantization: Q4_K_M
+disk-size: 1827M
+required-memory: 0M
+
+description: |
+  SmolLM3-3B is a compact language model optimized for efficient
+  natural language understanding, reasoning, and generation tasks. This variant uses
+  Q4_K_M quantization for a balance of performance and efficiency.
+model-card-url: https://huggingface.co/unsloth/SmolLM3-3B-GGUF
+
+capabilities:
+  - text
+
+components:
+  - smollm3-3b-q4-k-m-gguf
+
+environment:
+  - MODEL_FILE=$SNAP_COMPONENTS/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf

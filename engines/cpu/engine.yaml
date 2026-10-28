@@ -1,0 +1,21 @@
+name: cpu
+summary: CPU-optimized for workstations
+vendor: Canonical Ltd
+devices:
+  anyof:
+    - type: cpu
+      architecture: amd64
+    - type: cpu
+      architecture: arm64
+
+runtime: llamacpp
+
+model:
+  default: smollm3-3b-q4-k-m-gguf
+  options:
+    - smollm3-3b-q4-k-m-gguf
+
+configurations:
+  sleep-idle-seconds: -1
+  min-context-size: 4096
+  threads: 6

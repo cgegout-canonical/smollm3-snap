@@ -1,0 +1,235 @@
+name: hal9000-smollm3
+title: HAL9000 SmolLM3
+summary: Local AI with HAL9000 SmolLM3 inference snap
+description: |
+  SmolLM3 is a compact large language model (LLM) developed by Hugging Face.
+  It is designed for efficient natural language tasks such as text generation,
+  summarization, reasoning, and question answering.
+
+  Use this snap to quickly install an optimized environment for local inference with HAL9000 SmolLM3.
+
+  The snap includes the following hardware-optimized inference engines:
+
+  * cpu: Optimized for x64 and ARM (armv8, armv9) CPUs
+
+  The most suitable engine is automatically selected based on the available hardware.
+
+  **Install:**
+
+  `sudo snap install hal9000-smollm3`
+
+  **Run:**
+
+  `hal9000-smollm3`
+
+  Some accelerators require extra drivers to be usable with this snap:
+  https://documentation.ubuntu.com/inference-snaps/how-to/setup/drivers/
+
+  **License:**
+
+  The SmolLM3 model is provided by Hugging Face under the Apache 2.0 license:
+  https://huggingface.co/collections/HuggingFaceTB/smollm3
+
+  The licenses of all the bundled software can be found after installing the snap at
+  `/snap/hal9000-smollm3/current/usr/share/doc`.
+
+icon: snap/gui/icon-256.png
+website: https://documentation.ubuntu.com/inference-snaps
+source-code: https://github.com/canonical/hal9000-smollm3-snap
+issues: https://github.com/canonical/inference-snaps/issues
+
+adopt-info: version
+
+base: core24
+grade: stable
+confinement: strict
+compression: lzo
+
+assumes:
+  - snapd2.68
+
+platforms:
+  amd64:
+  arm64:
+
+slots:
+  provider:
+    interface: content
+    content: inference-provider
+    source:
+      read:
+        - $SNAP_COMMON/share/provider
+
+plugs:
+  home:
+    read: all
+
+environment:
+  SNAP_COMPONENTS: /snap/$SNAP_INSTANCE_NAME/components/$SNAP_REVISION
+  ARCH_TRIPLET: $CRAFT_ARCH_TRIPLET_BUILD_FOR
+
+hooks:
+  install:
+    plugs: &install-plugs
+      - hardware-observe
+      - opengl
+  post-refresh:
+    plugs: *install-plugs
+
+parts:
+  version:
+    after: [cli]
+    plugin: nil
+    source: .
+    build-packages:
+      - jq
+      - git
+    override-pull: |
+      # Do nothing. This significantly reduces build time when sourcing large files.
+    override-build: |
+      set -eo pipefail
+      cli_version=$($CRAFT_STAGE/bin/modelctl version --format=json | jq .cli --raw-output)
+      git_hash=$(git -C "$SNAPCRAFT_PROJECT_DIR" describe --always)
+      craftctl set version="${cli_version#v}+${git_hash}"
+
+  cli:
+    source:
+      - on amd64: https://github.com/canonical/inference-snaps-cli/releases/download/v2.0.0-beta.18/inference-snaps-cli-linux-amd64.tar.xz
+      - on arm64: https://github.com/canonical/inference-snaps-cli/releases/download/v2.0.0-beta.18/inference-snaps-cli-linux-arm64.tar.xz
+    plugin: dump
+    override-build: |
+      mv bin/modelctl bin/modelctl.real
+      cat << 'EOF' > bin/modelctl
+      #!/bin/bash
+      if [ -n "${SNAP:-}" ] && [ -d "${SNAP}/components" ]; then
+        if [ -z "${SNAP_COMPONENTS:-}" ] || [ ! -d "${SNAP_COMPONENTS}/llamacpp" ] || [ ! -d "${SNAP_COMPONENTS}/smollm3-3b-q4-k-m-gguf" ]; then
+          export SNAP_COMPONENTS="${SNAP}/components"
+        fi
+      fi
+      exec -a "$0" "$(dirname "$0")/modelctl.real" "$@"
+      EOF
+      chmod +x bin/modelctl
+      ln --symbolic ./modelctl bin/hal9000-smollm3
+      craftctl default
+
+  cli-lspci:
+    plugin: nil
+    stage-packages:
+      - pciutils
+
+  webui:
+    plugin: dump
+    source: https://github.com/canonical/inference-snaps-webui/releases/download/v1.1.1/inference-snaps-webui.tar.xz
+    organize:
+      "*": webui/
+
+  engines:
+    source: engines
+    plugin: dump
+    organize:
+      "*": engines/
+
+  models:
+    source: models
+    plugin: dump
+    organize:
+      "*": models/
+
+  runtimes:
+    source: runtimes
+    plugin: dump
+    organize:
+      "*": runtimes/
+
+  scripts:
+    source: scripts
+    plugin: dump
+    stage-packages:
+      - jq
+    organize:
+      "server.sh": bin/
+      "server-webui.sh": bin/
+
+  model-weights:
+    plugin: cmake
+    source: model-weights
+    override-build: |
+      cp -rf --archive --link --no-dereference ${CRAFT_PART_SRC}/* ${CRAFT_PART_INSTALL}
+      mkdir -p ${CRAFT_PART_INSTALL}/components/smollm3-3b-q4-k-m-gguf
+      cp -rf --archive --link --no-dereference ${CRAFT_PART_SRC}/smollm3-3b-q4-k-m-gguf/* ${CRAFT_PART_INSTALL}/components/smollm3-3b-q4-k-m-gguf/
+    organize:
+      "smollm3-3b-q4-k-m-gguf/*": (component/smollm3-3b-q4-k-m-gguf)
+    prime:
+      - -*
+      - components/**
+
+  llamacpp:
+    plugin: dump
+    source:
+      - on amd64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-amd64.tar.gz
+      - on arm64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-arm64.tar.gz
+    stage-packages:
+      - libgomp1
+    override-build: |
+      craftctl default
+      mkdir -p ${CRAFT_PART_INSTALL}/components/llamacpp
+      cp -rf --archive --link --no-dereference ${CRAFT_PART_INSTALL}/bin ${CRAFT_PART_INSTALL}/lib ${CRAFT_PART_INSTALL}/usr ${CRAFT_PART_INSTALL}/components/llamacpp/
+    organize:
+      "licenses": usr/share/doc/llama.cpp
+      "components/llamacpp": components/llamacpp
+      "*": (component/llamacpp)
+
+  notice:
+    plugin: nil
+    source: NOTICE
+    source-type: file
+    override-build: |
+      license_dir=$CRAFT_PART_INSTALL/usr/share/doc
+      mkdir -p $license_dir
+      cp NOTICE $license_dir/
+      cp $SNAPCRAFT_PROJECT_DIR/LICENSE $license_dir/
+      cp $SNAPCRAFT_PROJECT_DIR/LICENSE-hal9000-smollm3 $license_dir/
+
+components:
+  smollm3-3b-q4-k-m-gguf:
+    type: standard
+    summary: SmolLM3 3B Q4_K_M GGUF
+    description: Model weights for SmolLM3 3B in GGUF format
+
+  llamacpp:
+    type: standard
+    summary: llama.cpp using default CPU instruction sets
+    description: LLM inference in C/C++
+
+apps:
+  hal9000-smollm3:
+    command: bin/modelctl
+    completer: bin/snap-completer.bash
+    plugs:
+      - hardware-observe
+      - opengl
+      - network
+      - desktop
+    environment:
+      ADDITIONAL_FEATURES: chat, webui
+
+  server:
+    command: bin/server.sh
+    daemon: simple
+    plugs:
+      - network-bind
+      - hardware-observe
+      - opengl
+      - home
+
+  server-webui:
+    command: bin/server-webui.sh
+    daemon: simple
+    plugs:
+      - network-bind
+
+lint:
+  ignore:
+    - metadata:
+      - license
+      - contact

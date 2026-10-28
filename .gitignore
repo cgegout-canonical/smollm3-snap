@@ -1,0 +1,10 @@
+*.snap
+*.comp
+parts/
+prime/
+stage/
+*.gguf
+model-weights/
+.craft/
+.snapd-relocate/
+.sdk/

@@ -1,0 +1,37 @@
+#!/bin/bash -eu
+
+port="$(modelctl get http.port)"
+host="$(modelctl get http.host)"
+sleep_idle_seconds="$(modelctl get sleep-idle-seconds || echo -1)"
+min_context_size="$(modelctl get min-context-size || echo 4096)"
+threads="$(modelctl get threads || echo 6)"
+model_name="$(modelctl model --format=json | jq -r '.name')"
+
+extra_args=()
+verbose="$(modelctl get verbose || echo false)"
+if [ "${verbose}" = "true" ]; then
+  extra_args+=(--verbose)
+fi
+
+mmproj_args=()
+if [ -n "${MMPROJ_FILE:-}" ]; then
+  mmproj_args=(--mmproj "$MMPROJ_FILE")
+fi
+
+set -x
+exec llama-server \
+  --model "$MODEL_FILE" \
+  --alias "$model_name" \
+  "${mmproj_args[@]}" \
+  --port "$port" \
+  --host "$host" \
+  --no-warmup \
+  --reasoning off \
+  --reasoning-budget 0 \
+  --ctx-size 4096 \
+  --parallel 1 \
+  --threads "$threads" \
+  --sleep-idle-seconds "$sleep_idle_seconds" \
+  --fit-ctx "$min_context_size" \
+  "${extra_args[@]}" \
+  "$@"
