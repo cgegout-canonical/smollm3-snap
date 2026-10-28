@@ -12,18 +12,18 @@
 ## 2. Artifact Assembly & Packaging
 The snap and its required components were assembled and packed using the host's native `snap pack` and `mksquashfs` utilities:
 
-- **Base Snap**: `hal9000-smollm3_2.0.0-beta.18+9f606f5_amd64.snap` (1.8 GB)
+- **Base Snap**: `smollm3_2.0.0-beta.18+9f606f5_amd64.snap` (2.5 GB)
   - Contains `meta/snap.yaml`, application launchers, modelctl CLI, webui, install/post-refresh hooks, and startup scripts.
   - Packed via `/usr/bin/snap pack`.
-  - SHA256: `75ed9dd71ab771b34c1eb042c97e0717eb3fa5a0145679b534b38c05877c25b4`
-- **Model Component**: `hal9000-smollm3+smollm3-3b-q4-k-m-gguf_2.0.0-beta.18+9f606f5.comp` (1.8 GB)
+  - SHA256: `995b3d4637f668e4f5bb028de6a4cbeef85df736b9f0c7be7c4360d4f37a5a4f`
+- **Model Component**: `smollm3+smollm3-3b-q4-k-m-gguf_2.0.0-beta.18+9f606f5.comp` (1.8 GB)
   - Contains `SmolLM3-3B-Q4_K_M.gguf` (SHA256: `4de907d2d388a5508fb7cb443a06effe14cce3518b0a78d3bdd9e74d9edce989`) and `meta/component.yaml`.
   - Packed via `mksquashfs -comp xz`.
-  - SHA256: `d3fdeb2dfccf74b1d1571128c01f22e5fc745b68bc7be08b79afbc7407ff48c6`
-- **Runtime Component**: `hal9000-smollm3+llamacpp_2.0.0-beta.18+9f606f5.comp` (15 MB)
+  - SHA256: `e5ad5eb782118a30606c66138c53b93733c5bd9e4fee6b2be7f756340b615949`
+- **Runtime Component**: `smollm3+llamacpp_2.0.0-beta.18+9f606f5.comp` (15 MB)
   - Contains Canonical llama.cpp CPU build 11669 and `meta/component.yaml`.
   - Packed via `mksquashfs -comp xz`.
-  - SHA256: `ca0bbc438268c8789eeb8a25326914bee089a2fec072bdf2a749c81ca3d456cd`
+  - SHA256: `bda28b97238c46f033dfd294b489bfb087af222d176b715886f1ee5af35b42a0`
 
 All checksums are tracked in `SHA256SUMS`.
 
@@ -51,7 +51,7 @@ All acceptance criteria passed (100% success rate).
 ## 5. Precise System Blocker & Resumption Instructions
 In strict compliance with the pipeline authorization:
 - `sudo -n true` failed with `sudo: interactive authentication is required`.
-- snapd requires root privilege (`polkit` / root UID) to install snaps (`snap install --dangerous hal9000-smollm3_*.snap hal9000-smollm3+*.comp`) and connect plugs (`snap connect`).
+- snapd requires root privilege (`polkit` / root UID) to install snaps (`snap install --dangerous smollm3_*.snap smollm3+*.comp`) and connect plugs (`snap connect`).
 - The developer submodule script `dev/smoke-test.sh` also enforces `check_root_privileges`.
 - Unrelated live snaps (`smollm3` on ports 8366/8367 and `smollm2` on 8344/8345) are running on the system and were preserved untouched.
 
@@ -59,23 +59,23 @@ In strict compliance with the pipeline authorization:
 When root / interactive sudo access is available, the built artifacts can be installed and verified in snapd with:
 
 ```bash
-cd /home/cgegout/projects/hal9000-smollm3-snap
+cd /home/cgegout/projects/smollm3
 
 # 1. Install snap and components
 sudo snap install --dangerous \
-  hal9000-smollm3_2.0.0-beta.18+9f606f5_amd64.snap \
-  hal9000-smollm3+smollm3-3b-q4-k-m-gguf_2.0.0-beta.18+9f606f5.comp \
-  hal9000-smollm3+llamacpp_2.0.0-beta.18+9f606f5.comp
+  smollm3_2.0.0-beta.18+9f606f5_amd64.snap \
+  smollm3+smollm3-3b-q4-k-m-gguf_2.0.0-beta.18+9f606f5.comp \
+  smollm3+llamacpp_2.0.0-beta.18+9f606f5.comp
 
 # 2. Connect plugs
-sudo snap connect hal9000-smollm3:hardware-observe
-sudo snap connect hal9000-smollm3:opengl
+sudo snap connect smollm3:hardware-observe
+sudo snap connect smollm3:opengl
 
 # 3. Start services
-sudo snap start hal9000-smollm3.server
-sudo snap start hal9000-smollm3.server-webui
+sudo snap start smollm3.server
+sudo snap start smollm3.server-webui
 
 # 4. Verify service status and logs
-snap services hal9000-smollm3
-sudo snap logs hal9000-smollm3.server -n 50
+snap services smollm3
+sudo snap logs smollm3.server -n 50
 ```

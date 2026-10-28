@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Repeatable benchmark script for hal9000-smollm3 CPU inference.
+Repeatable benchmark script for smollm3 CPU inference.
 Compares 4 threads, 6 threads (6 P-cores), and 8 threads.
 Measures:
   - Startup latency
@@ -18,7 +18,7 @@ import os
 import signal
 import sys
 
-MODEL_PATH = "/home/cgegout/projects/hal9000-smollm3-snap/model-weights/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf"
+MODEL_PATH = "/home/cgegout/projects/smollm3/model-weights/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf"
 SERVER_BIN = "/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/comp_llamacpp/bin/llama-server"
 LD_LIB = "/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/comp_llamacpp/lib:/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/snap_unpack/usr/lib:/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/snap_unpack/usr/lib/x86_64-linux-gnu"
 PORT = 8356

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive automated test suite for hal9000-smollm3 OpenAI-compatible API.
+Comprehensive automated test suite for smollm3 OpenAI-compatible API.
 Tests:
   1. Health & Models listing endpoints
   2. Single-turn conversation with HAL 9000 persona (2-3 sentences, max 128 tokens)
@@ -17,7 +17,7 @@ import json
 import os
 import sys
 
-MODEL_PATH = "/home/cgegout/projects/hal9000-smollm3-snap/model-weights/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf"
+MODEL_PATH = "/home/cgegout/projects/smollm3/model-weights/smollm3-3b-q4-k-m-gguf/SmolLM3-3B-Q4_K_M.gguf"
 SERVER_BIN = "/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/comp_llamacpp/bin/llama-server"
 LD_LIB = "/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/comp_llamacpp/lib:/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/snap_unpack/usr/lib:/home/cgegout/projects/hal9000-smollm3-snap/build-scratch/snap_unpack/usr/lib/x86_64-linux-gnu"
 PORT = 8356
@@ -54,7 +54,7 @@ def run_tests():
         "--cache-prompt"
     ]
 
-    print("Starting hal9000-smollm3 runtime...")
+    print("Starting smollm3 runtime...")
     proc = subprocess.Popen(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         if not wait_for_server(25):

@@ -3,7 +3,7 @@ SHELL := /bin/bash
 # Always run `hf` via pipx to avoid relying on local `hf` installations.
 hf := pipx run --spec "huggingface_hub[cli]" hf
 
-SNAP_NAME ?= hal9000-smollm3
+SNAP_NAME ?= smollm3
 ENGINE ?= cpu
 MODEL_SOURCE_DIR ?= /home/cgegout/projects/smollm3_old
 

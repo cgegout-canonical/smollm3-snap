@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   cicd:
-    if: github.repository == 'canonical/hal9000-smollm3-snap'
+    if: github.repository == 'canonical/smollm3-snap'
     uses: canonical/inference-snaps-dev/.github/workflows/reuse-cicd.yaml@v2
     with:
       build-runner: |
@@ -21,7 +21,7 @@ jobs:
           "ubuntu-24.04-arm"
         ]
       store-track: latest
-      snap-name: hal9000-smollm3
+      snap-name: smollm3
       smoke-test-engine: cpu
       smoke-test-runner: |
         [

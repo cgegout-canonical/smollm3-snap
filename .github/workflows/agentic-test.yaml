@@ -11,7 +11,7 @@ jobs:
       - name: Run test
         uses: canonical/inference-snaps-dev/.github/actions/agentic-test@v2
         with:
-          snap-name: hal9000-smollm3
+          snap-name: smollm3
           snap-channel: beta
           create-issues: true
           openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}

@@ -1,6 +1,6 @@
 # Stage 2: GitHub Workflows Report
 
-Snap Name: `hal9000-smollm3`
+Snap Name: `smollm3`
 Repository: `canonical/hal9000-smollm3-snap`
 
 ## Adaptations & Configuration

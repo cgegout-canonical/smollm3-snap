@@ -1,18 +1,18 @@
 ---
-snap-name: hal9000-smollm3
-snap-title: HAL9000 SmolLM3
+snap-name: smollm3
+snap-title: SmolLM3
 model-card: https://huggingface.co/unsloth/SmolLM3-3B-GGUF
 http-port: 8356
 webui-http-port: 8357
 engines: cpu
 ---
 
-# HAL9000 SmolLM3 inference snap
-[![hal9000-smollm3](https://snapcraft.io/hal9000-smollm3/badge.svg)](https://snapcraft.io/hal9000-smollm3)
+# SmolLM3 inference snap
+[![smollm3](https://snapcraft.io/smollm3/badge.svg)](https://snapcraft.io/smollm3)
 
 SmolLM3 is a compact large language model optimized for low-latency conversations, reasoning, and instruction-following tasks.
 
-Use this snap to quickly install an optimized environment for local inference with HAL9000 SmolLM3.
+Use this snap to quickly install an optimized environment for local inference with SmolLM3.
 
 The snap includes the following hardware-optimized inference engines:
 
@@ -22,12 +22,12 @@ The CPU engine is automatically selected for host execution without requiring GP
 
 #### Install
 ```shell
-sudo snap install hal9000-smollm3
+sudo snap install smollm3
 ```
 
 #### Run
 ```shell
-hal9000-smollm3
+smollm3
 ```
 
 ## Resources
@@ -42,8 +42,8 @@ hal9000-smollm3
 
 Clone the repo:
 ```shell
-git clone https://github.com/canonical/hal9000-smollm3-snap
-cd hal9000-smollm3-snap
+git clone https://github.com/canonical/smollm3-snap
+cd smollm3-snap
 ```
 
 Initialize the development environment:

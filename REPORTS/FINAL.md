@@ -1,14 +1,14 @@
-# Final Pipeline Report: hal9000-smollm3
+# Final Pipeline Report: smollm3
 
 ## Executive Summary
-The Canonical inference snap for HAL9000 (`hal9000-smollm3`) packaging SmolLM3-3B Q4_K_M GGUF for low-latency CPU-only inference on a System76 Gazelle laptop has been scaffolded, validated, packed, and benchmarked autonomously following Canonical's Inference Snap Maker SDK v2 specifications.
+The Canonical inference snap (`smollm3`) packaging SmolLM3-3B Q4_K_M GGUF for low-latency CPU-only inference on a System76 Gazelle laptop has been scaffolded, validated, packed, and benchmarked autonomously following Canonical's Inference Snap Maker SDK v2 specifications.
 
 ## Delivered Artifacts
-The workspace `/home/cgegout/projects/hal9000-smollm3-snap` contains:
+The workspace `/home/cgegout/projects/smollm3` contains:
 1. **Snap Packages**:
-   - `hal9000-smollm3_2.0.0-beta.18+9f606f5_amd64.snap` (SHA256: `75ed9dd71ab771b34c1eb042c97e0717eb3fa5a0145679b534b38c05877c25b4`)
-   - `hal9000-smollm3+smollm3-3b-q4-k-m-gguf_2.0.0-beta.18+9f606f5.comp` (SHA256: `d3fdeb2dfccf74b1d1571128c01f22e5fc745b68bc7be08b79afbc7407ff48c6`)
-   - `hal9000-smollm3+llamacpp_2.0.0-beta.18+9f606f5.comp` (SHA256: `ca0bbc438268c8789eeb8a25326914bee089a2fec072bdf2a749c81ca3d456cd`)
+   - `smollm3_2.0.0-beta.18+9f606f5_amd64.snap` (SHA256: `995b3d4637f668e4f5bb028de6a4cbeef85df736b9f0c7be7c4360d4f37a5a4f`)
+   - `smollm3+smollm3-3b-q4-k-m-gguf_2.0.0-beta.18+9f606f5.comp` (SHA256: `e5ad5eb782118a30606c66138c53b93733c5bd9e4fee6b2be7f756340b615949`)
+   - `smollm3+llamacpp_2.0.0-beta.18+9f606f5.comp` (SHA256: `bda28b97238c46f033dfd294b489bfb087af222d176b715886f1ee5af35b42a0`)
    - `SHA256SUMS` tracking artifact hashes.
 2. **Reproducible Source & Configuration**:
    - `snap/snapcraft.yaml`: Core24, strict confinement, pinned CLI v2.0.0-beta.18 and llama.cpp runtime b11669.

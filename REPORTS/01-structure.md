@@ -1,7 +1,7 @@
 # Stage 1: Inference Snap Structure Report
 
 Target Workspace: `/home/cgegout/projects/hal9000-smollm3-snap`
-Snap Name: `hal9000-smollm3`
+Snap Name: `smollm3`
 Snap Title: `HAL9000 SmolLM3`
 Architecture: `amd64` (and `arm64` cross-platform config)
 Model ID: `smollm3-3b-q4-k-m-gguf`

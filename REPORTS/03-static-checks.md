@@ -1,7 +1,7 @@
 # Stage 3: Inference Snap Static Checks Report
 
-Workspace: `/home/cgegout/projects/hal9000-smollm3-snap`
-Snap Name: `hal9000-smollm3`
+Workspace: `/home/cgegout/projects/smollm3`
+Snap Name: `smollm3`
 
 ## Validation Results
 

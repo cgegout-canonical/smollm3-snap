@@ -1,12 +1,12 @@
-name: hal9000-smollm3
-title: HAL9000 SmolLM3
-summary: Local AI with HAL9000 SmolLM3 inference snap
+name: smollm3
+title: SmolLM3
+summary: Local AI with SmolLM3 inference snap
 description: |
   SmolLM3 is a compact large language model (LLM) developed by Hugging Face.
   It is designed for efficient natural language tasks such as text generation,
   summarization, reasoning, and question answering.
 
-  Use this snap to quickly install an optimized environment for local inference with HAL9000 SmolLM3.
+  Use this snap to quickly install an optimized environment for local inference with SmolLM3.
 
   The snap includes the following hardware-optimized inference engines:
 
@@ -16,11 +16,11 @@ description: |
 
   **Install:**
 
-  `sudo snap install hal9000-smollm3`
+  `sudo snap install smollm3`
 
   **Run:**
 
-  `hal9000-smollm3`
+  `smollm3`
 
   Some accelerators require extra drivers to be usable with this snap:
   https://documentation.ubuntu.com/inference-snaps/how-to/setup/drivers/
@@ -31,11 +31,11 @@ description: |
   https://huggingface.co/collections/HuggingFaceTB/smollm3
 
   The licenses of all the bundled software can be found after installing the snap at
-  `/snap/hal9000-smollm3/current/usr/share/doc`.
+  `/snap/smollm3/current/usr/share/doc`.
 
 icon: snap/gui/icon-256.png
 website: https://documentation.ubuntu.com/inference-snaps
-source-code: https://github.com/canonical/hal9000-smollm3-snap
+source-code: https://github.com/canonical/smollm3-snap
 issues: https://github.com/canonical/inference-snaps/issues
 
 adopt-info: version
@@ -109,7 +109,7 @@ parts:
       exec -a "$0" "$(dirname "$0")/modelctl.real" "$@"
       EOF
       chmod +x bin/modelctl
-      ln --symbolic ./modelctl bin/hal9000-smollm3
+      ln --symbolic ./modelctl bin/smollm3
       craftctl default
 
   cli-lspci:
@@ -188,7 +188,7 @@ parts:
       mkdir -p $license_dir
       cp NOTICE $license_dir/
       cp $SNAPCRAFT_PROJECT_DIR/LICENSE $license_dir/
-      cp $SNAPCRAFT_PROJECT_DIR/LICENSE-hal9000-smollm3 $license_dir/
+      cp $SNAPCRAFT_PROJECT_DIR/LICENSE-smollm3 $license_dir/
 
 components:
   smollm3-3b-q4-k-m-gguf:
@@ -202,7 +202,7 @@ components:
     description: LLM inference in C/C++
 
 apps:
-  hal9000-smollm3:
+  smollm3:
     command: bin/modelctl
     completer: bin/snap-completer.bash
     plugs:

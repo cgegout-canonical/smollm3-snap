@@ -1,6 +1,6 @@
 # HAL9000 Client Integration Guide
 
-This document describes how to configure HAL9000 to interact with the local `hal9000-smollm3` inference service.
+This document describes how to configure HAL9000 to interact with the local `smollm3` inference service.
 
 ## 1. Service Endpoints
 - **Base URL**: `http://127.0.0.1:8356/v1`
