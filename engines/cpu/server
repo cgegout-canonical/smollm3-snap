@@ -32,6 +32,7 @@ exec llama-server \
   --parallel 1 \
   --threads "$threads" \
   --sleep-idle-seconds "$sleep_idle_seconds" \
+  --cache-prompt \
   --fit-ctx "$min_context_size" \
   "${extra_args[@]}" \
   "$@"
