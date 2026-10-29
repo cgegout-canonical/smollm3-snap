@@ -6,7 +6,7 @@ sleep_idle_seconds="$(modelctl get sleep-idle-seconds)"
 min_context_size="$(modelctl get min-context-size)"
 reasoning_budget="$(modelctl get reasoning-budget || true)"
 if [ -z "${reasoning_budget:-}" ]; then
-  reasoning_budget=64
+  reasoning_budget=0
 fi
 model_name=$("$SNAP_NAME" status --format=json | jq -r '.model.name')
 
