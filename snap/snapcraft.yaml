@@ -61,10 +61,6 @@ slots:
     source:
       read:
         - $SNAP_COMMON/share/provider
-plugs:
-  # To allow side-loading models into server (root daemon) from user home directory
-  home:
-    read: all
 
 environment:
   SNAP_COMPONENTS: /snap/$SNAP_INSTANCE_NAME/components/$SNAP_REVISION
@@ -197,8 +193,6 @@ parts:
     source: model-weights
     override-build: |
       cp -rf --archive --link --no-dereference ${CRAFT_PART_SRC}/* ${CRAFT_PART_INSTALL}
-      mkdir -p ${CRAFT_PART_INSTALL}/components/smollm3-3b-q4-k-m-gguf
-      cp -rf --archive --link --no-dereference ${CRAFT_PART_SRC}/smollm3-3b-q4-k-m-gguf/* ${CRAFT_PART_INSTALL}/components/smollm3-3b-q4-k-m-gguf/
     organize:
       "llamacpp/*": (component/llamacpp)
       "llamacpp-cuda/*": (component/llamacpp-cuda)
@@ -206,9 +200,8 @@ parts:
       "smollm3-3b-q4-k-m-gguf/*": (component/smollm3-3b-q4-k-m-gguf)
       
     prime:
-      # Exclude everything not explicitly organized except bundled components fallback
+      # Exclude everything not explicitly organized
       - -*
-      - components/**
 
   llamacpp:
     plugin: dump
@@ -217,13 +210,8 @@ parts:
       - on arm64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-arm64.tar.gz
     stage-packages:
       - libgomp1
-    override-build: |
-      craftctl default
-      mkdir -p ${CRAFT_PART_INSTALL}/components/llamacpp
-      cp -rf --archive --link --no-dereference ${CRAFT_PART_INSTALL}/bin ${CRAFT_PART_INSTALL}/lib ${CRAFT_PART_INSTALL}/usr ${CRAFT_PART_INSTALL}/components/llamacpp/
     organize:
       "licenses": usr/share/doc/llama.cpp # Add licenses to the snap
-      "components/llamacpp": components/llamacpp
       "*": (component/llamacpp)
     
   llamacpp-cuda:
@@ -233,13 +221,8 @@ parts:
       - on arm64: https://github.com/canonical/llama.cpp-builds/releases/download/b11669/llamacpp-arm64+cuda12.9.tar.gz
     stage-packages:
       - libgomp1
-    override-build: |
-      craftctl default
-      mkdir -p ${CRAFT_PART_INSTALL}/components/llamacpp-cuda
-      cp -rf --archive --link --no-dereference ${CRAFT_PART_INSTALL}/bin ${CRAFT_PART_INSTALL}/lib ${CRAFT_PART_INSTALL}/usr ${CRAFT_PART_INSTALL}/components/llamacpp-cuda/
     organize:
       "licenses": usr/share/doc/llama.cpp+cuda # Add licenses to the snap
-      "components/llamacpp-cuda": components/llamacpp-cuda
       "*": (component/llamacpp-cuda)
 
   llamacpp-vulkan:
@@ -251,8 +234,16 @@ parts:
       - libgomp1
       - libvulkan1
       - mesa-vulkan-drivers
+    override-build: |
+      craftctl default
+      mkdir -p ${CRAFT_PART_INSTALL}/bin ${CRAFT_PART_INSTALL}/lib
+      mv ${CRAFT_PART_INSTALL}/llama* ${CRAFT_PART_INSTALL}/ggml-rpc-server ${CRAFT_PART_INSTALL}/bin/
+      mv ${CRAFT_PART_INSTALL}/lib*.so* ${CRAFT_PART_INSTALL}/lib/
+      for lib in ${CRAFT_PART_INSTALL}/lib/libggml-*.so; do
+        [ -e "$lib" ] && ln -sf "../lib/$(basename "$lib")" "${CRAFT_PART_INSTALL}/bin/$(basename "$lib")"
+      done
     organize:
-      "components/llamacpp-vulkan": components/llamacpp-vulkan
+      "LICENSE": usr/share/doc/llama.cpp+vulkan/LICENSE
       "*": (component/llamacpp-vulkan)
 
   notice:
