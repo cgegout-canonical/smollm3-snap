@@ -36,8 +36,9 @@ description: |
   `/snap/smollm3/current/usr/share/doc`.
 
 icon: snap/gui/icon-256.png
+license: Apache-2.0
 website: https://documentation.ubuntu.com/inference-snaps
-source-code: https://github.com/canonical/smollm3-snap
+source-code: https://github.com/cgegout-canonical/smollm3-snap
 issues: https://github.com/canonical/inference-snaps/issues
 
 adopt-info: version
@@ -308,5 +309,4 @@ apps:
 lint:
   ignore:
     - metadata:
-      - license
       - contact
