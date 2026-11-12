@@ -14,5 +14,6 @@ jobs:
           snap-name: smollm3
           snap-channel: beta
           create-issues: true
+          issue-repo: cgegout-canonical/smollm3-snap
           openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
           issue-create-token: ${{ secrets.ISSUE_CREATE_TOKEN }}
